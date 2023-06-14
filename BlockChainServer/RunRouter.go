@@ -2,6 +2,7 @@ package main
 
 import (
 	. "BlockChainFinalExam/BlockChain"
+	"BlockChainFinalExam/utils"
 	"BlockChainFinalExam/wallet"
 	"github.com/fatih/color"
 	"log"
@@ -14,7 +15,8 @@ func (bcs *BlockchainServer) GetBlockchain() *Blockchain {
 	bc, ok := cache["blockchain"]
 	if !ok {
 		//创建一个矿工钱包实例
-		minersWallet := wallet.NewWallet()
+		//minersWallet := wallet.NewWallet()
+		minersWallet := wallet.LoadWallet(utils.MINNER_PRIVATE_KEY)
 		// NewBlockchain与以前的方法不一样,增加了地址和端口2个参数,是为了区别不同的节点
 		bc = NewBlockchain(minersWallet.BlockchainAddress(), bcs.Port())
 		cache["blockchain"] = bc

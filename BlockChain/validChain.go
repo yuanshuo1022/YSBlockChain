@@ -2,7 +2,7 @@ package BlockChain
 
 import (
 	. "BlockChainFinalExam/Block"
-	. "BlockChainFinalExam/utils"
+	//. "BlockChainFinalExam/utils"
 )
 
 func (bc *Blockchain) ValidChain(chain []*Block) bool {

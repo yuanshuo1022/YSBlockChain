@@ -1,7 +1,6 @@
 package BlockChain
 
 import (
-	. "BlockChainFinalExam/Block"
 	. "BlockChainFinalExam/Transactions"
 	. "BlockChainFinalExam/utils"
 	"bytes"
@@ -62,7 +61,15 @@ func (bc *Blockchain) CalculateTotalAmount(accountAddress string) uint64 {
 // VerifyTransactionSignature 验证交易签名
 func (bc *Blockchain) VerifyTransactionSignature(
 	senderPublicKey *ecdsa.PublicKey, s Signature, t *Transaction) bool {
-	m, _ := json.Marshal(t)
+	m, _ := json.Marshal(struct {
+		Sender    string `json:"sender_blockchain_address"`
+		Recipient string `json:"recipient_blockchain_address"`
+		Value     int64  `json:"value"`
+	}{
+		Sender:    t.SenderAddress,
+		Recipient: t.ReceiveAddress,
+		Value:     t.Value,
+	})
 	h := sha256.Sum256([]byte(m))
 	return ecdsa.Verify(senderPublicKey, h[:], s.R, s.S)
 }

@@ -17,7 +17,7 @@ func init() {
 
 func main() {
 
-	port := flag.Uint("port", 5003, "TCP Port Number for Blockchain Server")
+	port := flag.Uint("port", 5000, "TCP Port Number for Blockchain Server")
 	flag.Parse()
 	fmt.Printf("port::%v \n", *port)
 	app := NewBlockchainServer(uint16(*port))

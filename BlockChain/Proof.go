@@ -5,12 +5,15 @@ import (
 	. "BlockChainFinalExam/Transactions"
 	. "BlockChainFinalExam/utils"
 	"fmt"
-	"github.com/fatih/color"
 	"log"
 	"math/big"
 	"net/http"
 	"time"
+
+	"github.com/fatih/color"
 )
+
+var MINING_DIFFICULT = 0x8000
 
 func (bc *Blockchain) StartMining() {
 	bc.Mining()
@@ -25,14 +28,15 @@ func (bc *Blockchain) Mining() bool {
 	defer bc.Mux.Unlock()
 
 	// 判断交易池是否有交易，如果没有交易，直接返回
-	if len(bc.TransactionPool) == 0 {
-		return false
-	}
+	//if len(bc.TransactionPool) == 0 {
+	//	//fmt.Println("没有交易，打包失败")
+	//	return false
+	//}
 	// 将挖矿奖励的交易加入交易池
 	bc.AddTransaction(MINING_ACCOUNT_ADDRESS, bc.BlockchainAddress, MINING_REWARD, nil, nil)
 	nonce, difficulty := bc.ProofOfWork()
 	previousHash := bc.LastBlock().Hash
-	bc.CreateBlock(difficulty, nonce, big.NewInt(int64(len(bc.Chain))), previousHash)
+	bc.CreateBlock(difficulty, nonce, big.NewInt(int64(GetFileCount())), previousHash)
 	log.Println("action=mining, status=success")
 	// 向邻居节点发送共识请求
 	for _, n := range bc.Neighbors {
@@ -53,7 +57,7 @@ func (bc *Blockchain) ProofOfWork() (*big.Int, *big.Int) {
 	begin := time.Now()                      // 记录开始时间
 	number := bc.LastBlock().GetNumber()     // 获取最新区块的高度
 	// 调整挖矿难度
-	if getBlockTimestampDifference(bc, len(bc.Chain)-1) < 3e+9 {
+	if getBlockTimestampDifference(bc, len(bc.Chain)-1) < 6e+9 {
 		MINING_DIFFICULT += 32
 	} else {
 		if MINING_DIFFICULT >= 130000 {
@@ -91,7 +95,7 @@ func (bc *Blockchain) ValidProof(
 		Timestamp:    0,
 	}
 	// 计算临时区块的哈希值，并将其转换为大整数
-	result := convertBytesToBigInt(tmpBlock.GetHash())
+	result := convertBytesToBigInt(tmpBlock.GenerateHash())
 	// 比较目标值和计算结果
 	return target.Cmp(result) > 0
 }
@@ -111,6 +115,7 @@ func getBlockTimestampDifference(bc *Blockchain, num int) int {
 
 // LastBlock 获取链上最后一个区块
 func (bc *Blockchain) LastBlock() *Block {
+
 	return bc.Chain[len(bc.Chain)-1]
 }
 
