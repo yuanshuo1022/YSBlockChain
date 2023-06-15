@@ -37,6 +37,7 @@ func (bcs *BlockchainServer) Run() {
 	http.HandleFunc("/mine/start", bcs.StartMine)
 	http.HandleFunc("/amount", bcs.Amount)
 	http.HandleFunc("/consensus", bcs.Consensus)
+
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(int(bcs.Port())), nil))
 
 }

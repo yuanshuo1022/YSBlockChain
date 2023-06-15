@@ -6,7 +6,6 @@ import (
 	"BlockChainFinalExam/wallet"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/fatih/color"
 	"io"
 	"log"
@@ -86,7 +85,6 @@ func (ws *WalletServer) CreateTransaction(
 		buf := bytes.NewBuffer(m)
 
 		resp, _ := http.Post(ws.Gateway()+"/transactions", "application/json", buf)
-		fmt.Println("=======================resp:", resp)
 		if resp.StatusCode == 201 {
 			// 201是哪里来的？请参见blockserver  Transactions方法的  w.WriteHeader(http.StatusCreated)语句
 			io.WriteString(w, string(utils.JsonStatus("success")))

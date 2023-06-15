@@ -51,8 +51,6 @@ func LoadBlock() ([]*Block, error) {
 		}
 		blocks = append(blocks, block)
 	}
-	fmt.Println("=================blocks:", blocks)
-
 	return blocks, nil
 }
 

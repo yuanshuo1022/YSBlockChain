@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YUANSHUO-区块链钱包</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <script type="text/javascript" src="./jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <style>
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+  </style>
+  <script>
+    $(function () {
+      $("#get_amount").click(function () {
+        var blockaddress = $("#blockchain_address").val();
+        let _postdata = {
+          blockchain_address: blockaddress,
+          // 添加其他参数...
+        };
+
+        console.log("blockaddress:", JSON.stringify(_postdata));
+
+        $.ajax({
+          url: "http://127.0.0.1:8080/wallet/amount",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(_postdata),
+          success: function (response) {
+            $("#wallet_amount").text(response["amount"]);
+
+            console.info(response);
+          },
+          error: function (error) {
+            console.error(error);
+          },
+        });
+      });
+
+      $("#reload_wallet").click(function () {
+        $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...').addClass('disabled');
+        $.ajax({
+          url: "http://127.0.0.1:8080/wallet",
+          type: "POST",
+          success: function (response) {
+            $("#public_key").val(response["public_key"]);
+            $("#private_key").val(response["private_key"]);
+            $("#blockchain_address").val(response["blockchain_address"]);
+            console.info(response);
+          },
+          error: function (error) {
+            console.error(error);
+          },
+          complete: function () {
+            $("#reload_wallet").html('Reload Wallet').removeClass('disabled');
+          }
+        });
+      });
+
+      $("#loadWalletByPrivatekey").click(function () {
+        var privateKeyValue = $("#private_key").val();
+        // alert("私钥的值是：" + privateKeyValue);
+        $.ajax({
+          url: "http://127.0.0.1:8080/walletByPrivatekey",
+          type: "POST",
+          data: {
+            privatekey: privateKeyValue,
+            // 添加其他参数...
+          },
+          success: function (response) {
+            $("#public_key").val(response["public_key"]);
+            $("#private_key").val(response["private_key"]);
+            $("#blockchain_address").val(response["blockchain_address"]);
+            console.info(response);
+          },
+          error: function (error) {
+            console.error(error);
+          },
+        });
+      });
+
+      $("#send_money_button").click(function () {
+        let confirm_text = "确定要发送吗?";
+        let confirm_result = confirm(confirm_text);
+        if (confirm_result !== true) {
+          alert("取消");
+          return;
+        }
+
+        let transaction_data = {
+          sender_private_key: $("#private_key").val(),
+          sender_blockchain_address: $("#blockchain_address").val(),
+          recipient_blockchain_address: $("#recipient_blockchain_address").val(),
+          sender_public_key: $("#public_key").val(),
+          value: $("#send_amount").val(),
+        };
+
+        $.ajax({
+          url: "/transaction",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(transaction_data),
+          success: function (response) {
+            console.info("response:", response);
+            console.info("response.message:", response.message);
+
+            if (response.message === "fail") {
+              alert("failed 222");
+              return;
+            }
+
+            alert("发送成功" + JSON.stringify(response));
+          },
+          error: function (response) {
+            console.error(response);
+            alert("发送失败");
+          },
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+<div class="container">
+  <h1>YUAN-SHUO区块链钱包</h1>
+  <div class="form-group">
+    <label for="blockchain_address">Blockchain Address</label>
+    <textarea id="blockchain_address" rows="1" class="form-control" readonly></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="public_key">Public Key</label>
+    <textarea id="public_key" rows="4" class="form-control" readonly></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="private_key">Private Key</label>
+    <textarea id="private_key" rows="1" class="form-control"></textarea>
+  </div>
+  <div class="d-grid gap-2 " >
+    <button id="loadWalletByPrivatekey" class="btn btn-warning">私钥加载</button>
+  </div>
+  <div class="d-grid gap-2 mt-3">
+    <button id="reload_wallet" class="btn btn-warning">随机生成</button>
+  </div>
+
+  <div class="d-grid gap-2 mt-3">
+    <button id="get_amount" class="btn btn-warning">获取余额</button>
+  </div>
+
+  <div id="wallet_amount" class="mt-3">0</div>
+</div>
+
+<div class="container mt-5">
+  <h1>Send Money</h1>
+  <div class="form-group">
+    <label for="recipient_blockchain_address">Recipient Address</label>
+    <input id="recipient_blockchain_address" type="text" class="form-control" />
+  </div>
+
+  <div class="form-group">
+    <label for="send_amount">Amount</label>
+    <input id="send_amount" type="text" class="form-control" />
+  </div>
+
+  <div class="d-grid gap-2">
+    <button id="send_money_button" class="btn btn-warning">Send</button>
+  </div>
+</div>
+</body>
+</html>

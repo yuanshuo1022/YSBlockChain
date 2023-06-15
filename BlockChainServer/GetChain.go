@@ -18,3 +18,6 @@ func (bcs *BlockchainServer) GetChain(w http.ResponseWriter, req *http.Request) 
 
 	}
 }
+func (bcs *BlockchainServer) GetBlockByHash(w http.ResponseWriter, req *http.Request) {
+
+}

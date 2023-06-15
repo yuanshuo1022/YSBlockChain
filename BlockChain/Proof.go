@@ -27,11 +27,11 @@ func (bc *Blockchain) Mining() bool {
 	bc.Mux.Lock()
 	defer bc.Mux.Unlock()
 
-	// 判断交易池是否有交易，如果没有交易，直接返回
-	//if len(bc.TransactionPool) == 0 {
-	//	//fmt.Println("没有交易，打包失败")
-	//	return false
-	//}
+	//判断交易池是否有交易，如果没有交易，直接返回
+	if len(bc.TransactionPool) == 0 {
+		//fmt.Println("没有交易，打包失败")
+		return false
+	}
 	// 将挖矿奖励的交易加入交易池
 	bc.AddTransaction(MINING_ACCOUNT_ADDRESS, bc.BlockchainAddress, MINING_REWARD, nil, nil)
 	nonce, difficulty := bc.ProofOfWork()
