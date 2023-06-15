@@ -100,7 +100,6 @@ func deserializeBlockFromCSV(row []string) (*Block, error) {
 
 // NewBlockchain 创建区块链
 func NewBlockchain(blockchainAddress string, port uint16) *Blockchain {
-
 	bc := new(Blockchain)
 	bc.Chain, _ = LoadBlock()
 	if GetFileCount() == 0 {
@@ -140,12 +139,54 @@ func (bc *Blockchain) Print() {
 	}
 	color.Yellow("%s\n\n\n", strings.Repeat("*", 50))
 }
-
 func (bc *Blockchain) MarshalJSON() ([]byte, error) {
+	type TransactionData struct {
+		SenderAddress  string `json:"senderAddress"`
+		ReceiveAddress string `json:"receiveAddress"`
+		Value          int64  `json:"value"`
+		Hash           string `json:"hash,omitempty"`
+	}
+
+	type BlockData struct {
+		Nonce        *big.Int           `json:"nonce"`
+		Timestamp    uint64             `json:"timestamp"`
+		Number       *big.Int           `json:"number"`
+		Difficulty   *big.Int           `json:"difficulty"`
+		ParentHash   string             `json:"parentHash"`
+		Hash         string             `json:"hash"`
+		Transactions []*TransactionData `json:"transactions"`
+	}
+
+	bcdArr := make([]*BlockData, 0)
+
+	for _, block := range bc.Chain {
+		bcd := &BlockData{
+			Nonce:      block.Nonce,
+			Timestamp:  block.Timestamp,
+			Number:     block.Number,
+			Difficulty: block.Difficulty,
+			ParentHash: fmt.Sprintf("%x", block.ParentHash),
+			Hash:       fmt.Sprintf("%x", block.Hash),
+		}
+
+		transactions := make([]*TransactionData, len(block.Transactions))
+		for i, tran := range block.Transactions {
+			transactions[i] = &TransactionData{
+				SenderAddress:  tran.SenderAddress,
+				ReceiveAddress: tran.ReceiveAddress,
+				Value:          tran.Value,
+				Hash:           fmt.Sprintf("%x", tran.Hash),
+			}
+		}
+
+		bcd.Transactions = transactions
+		bcdArr = append(bcdArr, bcd)
+	}
+
 	return json.Marshal(struct {
-		Blocks []*Block `json:"chain"`
+		Blocks []*BlockData `json:"chain"`
 	}{
-		Blocks: bc.Chain,
+		Blocks: bcdArr,
 	})
 }
 

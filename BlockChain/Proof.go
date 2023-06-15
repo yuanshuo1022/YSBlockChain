@@ -28,8 +28,7 @@ func (bc *Blockchain) Mining() bool {
 	defer bc.Mux.Unlock()
 
 	//判断交易池是否有交易，如果没有交易，直接返回
-	if len(bc.TransactionPool) == 0 {
-		//fmt.Println("没有交易，打包失败")
+	if len(bc.TransactionPool) == 0 && len(bc.Chain) != 1 {
 		return false
 	}
 	// 将挖矿奖励的交易加入交易池
